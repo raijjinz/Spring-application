@@ -2,7 +2,7 @@ package com.quinbay.SpringDemo.DTO;
 
 public class ProductDTO {
     private boolean inStock;
-    private int salePrice;
+    private double salePrice;
     private String description;
     private String title;
 
@@ -14,11 +14,11 @@ public class ProductDTO {
         this.inStock = inStock;
     }
 
-    public int getSalePrice() {
+    public double getSalePrice() {
         return salePrice;
     }
 
-    public void setSalePrice(int salePrice) {
+    public void setSalePrice(double salePrice) {
         this.salePrice = salePrice;
     }
 
