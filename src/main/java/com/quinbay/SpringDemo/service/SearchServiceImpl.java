@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class SearchServiceImpl implements SearchService {
@@ -19,6 +22,18 @@ public class SearchServiceImpl implements SearchService {
 
     @Autowired
     private SearchClient searchClient;
+
+    public void awaitTerminationAfterShutdown(ExecutorService threadPool) {
+        threadPool.shutdown();
+        try {
+            if (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
+                threadPool.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            threadPool.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
 
 
 
@@ -30,12 +45,28 @@ public class SearchServiceImpl implements SearchService {
     public ResponseDTO returnArray(RequestDTO x){
         String brand = (x.getSearchTerm()); // q= samsung
         String location = "stockLocation:" + x.getLocation(); // q= "sl:" +
-        ArrayList<ProductDTO> arrProducts = getArrayOfProducts(brand);
-        ArrayList<ProductDTO> arrLocProducts = getArrayOfProducts(location);
-
         ResponseDTO obj = new ResponseDTO();
-        obj.setArrP(arrProducts);
-        obj.setProductLocation(arrLocProducts);
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        executor.execute(() -> {
+                    System.out.println(Thread.currentThread().getId());
+                    ArrayList<ProductDTO> arrProducts = getArrayOfProducts(brand);
+                    obj.setArrP(arrProducts);
+                });
+
+
+
+        executor.execute(() -> {
+                    System.out.println(Thread.currentThread().getId());
+                    ArrayList<ProductDTO> arrLocProducts = getArrayOfProducts(location);
+                    obj.setProductLocation(arrLocProducts);
+
+
+                });
+
+
+
+        awaitTerminationAfterShutdown(executor);
         return obj;
 
 
