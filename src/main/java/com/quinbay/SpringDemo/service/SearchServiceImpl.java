@@ -20,31 +20,60 @@ public class SearchServiceImpl implements SearchService {
     @Autowired
     private SearchClient searchClient;
 
+
+
+
+
+    
+
     public ResponseDTO returnArray(RequestDTO x){
         ArrayList<ProductDTO> arrpto = new ArrayList<>();
-        Map<String, Object> productResponse = searchClient.getProducts(x.getSearchTerm());
+        Map<String, Object> productResponse = searchClient.getProducts(x.getSearchTerm()); // q= samsung
+        Map<String, Object>  productLocResponse = searchClient.getProducts(("stockLocation:" + x.getLocation())); // q= "sl:" +
+
+
         Map<String, Object> response = (Map<String, Object>) productResponse.get("response");
         List<Map<String, Object>> products = (List<Map<String, Object>>) (response.get("docs"));
-        for (Map<String,Object> mapObj:products){
+        for (Map<String,Object> mapObj:products) {
             ProductDTO product = new ProductDTO();
             product.setTitle(mapObj.get("name").toString());
-            if ((Integer)mapObj.get("isInStock")>0){
+            if ((Integer) mapObj.get("isInStock") > 0) {
                 product.setInStock(true);
-            }
-            else{
+            } else {
                 product.setInStock(false);
             }
-
             product.setSalePrice(Double.parseDouble(mapObj.get("offerPrice").toString()));
             product.setDescription(mapObj.get("description").toString());
             arrpto.add(product);
+        }
+
+        Map<String, Object> locresponse = (Map<String, Object>) productLocResponse.get("response");
+        List<Map<String, Object>> locproducts = (List<Map<String, Object>>) (locresponse.get("docs"));
+        ArrayList<ProductDTO> productLocationDTOs = new ArrayList<>();
+        for (Map<String,Object> mapObj:locproducts) {
+                ProductDTO product = new ProductDTO();
+                product.setTitle(mapObj.get("name").toString());
+                if ((Integer) mapObj.get("isInStock") > 0) {
+                    product.setInStock(true);
+                } else {
+                    product.setInStock(false);
+                }
+                product.setSalePrice(Double.parseDouble(mapObj.get("offerPrice").toString()));
+                product.setDescription(mapObj.get("description").toString());
+            productLocationDTOs.add(product);
+        }
+
+        ResponseDTO obj = new ResponseDTO();
+        obj.setArrP(arrpto);
+        obj.setProductLocation(productLocationDTOs);
+        return obj;
+
+
 
         }
 
 
-        ResponseDTO obj = new ResponseDTO();
-        obj.setArrP(arrpto);
-        return obj;
+
 
 
 
@@ -74,4 +103,4 @@ public class SearchServiceImpl implements SearchService {
 //        return obj;
 
     }
-}
+
