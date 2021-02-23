@@ -23,18 +23,29 @@ public class SearchServiceImpl implements SearchService {
 
 
 
-
-    
-
     public ResponseDTO returnArray(RequestDTO x){
+        String brand = (x.getSearchTerm()); // q= samsung
+        String location = "stockLocation:" + x.getLocation(); // q= "sl:" +
+        ArrayList<ProductDTO> arrProducts = getArrayOfProducts(brand);
+        ArrayList<ProductDTO> arrLocProducts = getArrayOfProducts(location);
+
+        ResponseDTO obj = new ResponseDTO();
+        obj.setArrP(arrProducts);
+        obj.setProductLocation(arrLocProducts);
+        return obj;
+
+
+    }
+
+
+    public ArrayList<ProductDTO> getArrayOfProducts(String x) implements Runnable {
         ArrayList<ProductDTO> arrpto = new ArrayList<>();
-        Map<String, Object> productResponse = searchClient.getProducts(x.getSearchTerm()); // q= samsung
-        Map<String, Object>  productLocResponse = searchClient.getProducts(("stockLocation:" + x.getLocation())); // q= "sl:" +
+        Map<String, Object> productResponse = searchClient.getProducts(x);
 
 
         Map<String, Object> response = (Map<String, Object>) productResponse.get("response");
         List<Map<String, Object>> products = (List<Map<String, Object>>) (response.get("docs"));
-        for (Map<String,Object> mapObj:products) {
+        for (Map<String, Object> mapObj : products) {
             ProductDTO product = new ProductDTO();
             product.setTitle(mapObj.get("name").toString());
             if ((Integer) mapObj.get("isInStock") > 0) {
@@ -46,27 +57,25 @@ public class SearchServiceImpl implements SearchService {
             product.setDescription(mapObj.get("description").toString());
             arrpto.add(product);
         }
+        return arrpto;
+    }
 
-        Map<String, Object> locresponse = (Map<String, Object>) productLocResponse.get("response");
-        List<Map<String, Object>> locproducts = (List<Map<String, Object>>) (locresponse.get("docs"));
-        ArrayList<ProductDTO> productLocationDTOs = new ArrayList<>();
-        for (Map<String,Object> mapObj:locproducts) {
-                ProductDTO product = new ProductDTO();
-                product.setTitle(mapObj.get("name").toString());
-                if ((Integer) mapObj.get("isInStock") > 0) {
-                    product.setInStock(true);
-                } else {
-                    product.setInStock(false);
-                }
-                product.setSalePrice(Double.parseDouble(mapObj.get("offerPrice").toString()));
-                product.setDescription(mapObj.get("description").toString());
-            productLocationDTOs.add(product);
-        }
+//        Map<String, Object> locresponse = (Map<String, Object>) productLocResponse.get("response");
+//        List<Map<String, Object>> locproducts = (List<Map<String, Object>>) (locresponse.get("docs"));
+//        ArrayList<ProductDTO> productLocationDTOs = new ArrayList<>();
+//        for (Map<String,Object> mapObj:locproducts) {
+//                ProductDTO product = new ProductDTO();
+//                product.setTitle(mapObj.get("name").toString());
+//                if ((Integer) mapObj.get("isInStock") > 0) {
+//                    product.setInStock(true);
+//                } else {
+//                    product.setInStock(false);
+//                }
+//                product.setSalePrice(Double.parseDouble(mapObj.get("offerPrice").toString()));
+//                product.setDescription(mapObj.get("description").toString());
+//            productLocationDTOs.add(product);
+//  }
 
-        ResponseDTO obj = new ResponseDTO();
-        obj.setArrP(arrpto);
-        obj.setProductLocation(productLocationDTOs);
-        return obj;
 
 
 
@@ -102,5 +111,5 @@ public class SearchServiceImpl implements SearchService {
 //        obj.setArrP(arrP);
 //        return obj;
 
-    }
+
 
