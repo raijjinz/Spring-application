@@ -38,7 +38,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
 
-    public ArrayList<ProductDTO> getArrayOfProducts(String x) implements Runnable {
+    public ArrayList<ProductDTO> getArrayOfProducts(String x)  {
         ArrayList<ProductDTO> arrpto = new ArrayList<>();
         Map<String, Object> productResponse = searchClient.getProducts(x);
 
